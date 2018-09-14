@@ -163,6 +163,36 @@ cmake --build . --target sirius --config Release
 
 See also [.appveyor.yml](.appveyor.yml)
 
+### Example using [conan]
+
+Since there is no public conan package for [GDAL], only `libsirius` and `libsirius-static` targets are available.
+
+[Install `conan`][conan-installation]
+
+```
+pip install conan
+```
+
+Install Sirius dependencies with [conan] (customize package options and settings using `-o` and `-s` command line options).
+
+```
+conan remote add hlysunnaram https://api.bintray.com/conan/hlysunnaram/public-conan
+conan install ../conan -o fftw:shared=False
+```
+
+Generate project and install Sirius libraries into `/tmp/sirius`
+
+```
+mkdir .build-conan
+cd .build-conan
+cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_paths.cmake \
+         -DCMAKE_BUILD_TYPE=Release \
+         -DCMAKE_INSTALL_PREFIX=/tmp/sirius \
+         -DENABLE_SIRIUS_EXECUTABLE=OFF
+         -DUSE_CXX_STATIC_RUNTIME=ON
+cmake --build . --target install
+```
+
 ## How to use
 
 ### Host requirements
@@ -462,6 +492,8 @@ Sirius developers would like to thank:
 [CS-SI]: https://uk.c-s.fr/ "CS Systèmes d'information"
 [CMake]: https://cmake.org/ "CMake"
 [vcpkg]: https://github.com/Microsoft/vcpkg "vcpkg"
+[conan]: https://conan.io/ "Conan, the C / C++ Package Manager for Developers"
+[conan-installation]: https://docs.conan.io/en/latest/installation.html "Conan installation"
 [GDAL]: http://www.gdal.org/ "Geospatial Data Abstraction Library"
 [FFTW]: http://www.fftw.org/ "Fastest Fourier Transform in the West"
 [Doxygen]: http://www.doxygen.org "Doxygen"

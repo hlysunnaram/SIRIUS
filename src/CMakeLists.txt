@@ -21,6 +21,8 @@
 
 cmake_minimum_required(VERSION 3.2)
 
+find_package(FFTW3 REQUIRED)
+
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include/sirius)
 
 message(STATUS "Generating sirius/sirius.h")
@@ -175,6 +177,20 @@ install(TARGETS libsirius libsirius-static
     INCLUDES DESTINATION "${SIRIUS_CONFIG_INCLUDE_DIR}")
 
 if (ENABLE_SIRIUS_EXECUTABLE OR BUILD_TESTING)
+    find_package(GDAL REQUIRED)
+
+    add_library(gdal SHARED IMPORTED)
+    set_target_properties(gdal PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES ${GDAL_INCLUDE_DIR}
+        INTERFACE_COMPILE_DEFINITIONS CPL_LOG=${ENABLE_LOGS})
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+        set_target_properties(gdal PROPERTIES
+            IMPORTED_IMPLIB ${GDAL_LIBRARY})
+    else()
+        set_target_properties(gdal PROPERTIES
+            IMPORTED_LOCATION ${GDAL_LIBRARY})
+    endif()
+
     add_library(libsirius-gdal-static STATIC EXCLUDE_FROM_ALL
         # gdal
         sirius/gdal/debug.h

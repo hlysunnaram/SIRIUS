@@ -1,0 +1,5 @@
+[requires]
+fftw/3.3.8@hlysunnaram/stable
+
+[generators]
+cmake_paths
