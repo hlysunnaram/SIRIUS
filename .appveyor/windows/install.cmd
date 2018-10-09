@@ -7,9 +7,13 @@ appveyor AddMessage "Updating vcpkg knowledge base..."
 ::   git pull
 
 :: use fork to fix multiple issues with release only version of the dependencies
+git config --global user.email "test@test.com"
+git config --global user.name "Test Test"
 git remote add release-build https://github.com/hlysunnaram/vcpkg.git || goto error
-git fetch release-build fix-vcpck-build-type || goto error
-git checkout fix-vcpck-build-type || goto error
+git fetch release-build update/gdal-2.3.2 || goto error
+git fetch release-build update/geos-3.6.3 || goto error
+git checkout update/gdal-2.3.2 || goto error
+git merge release-build/update/geos-3.6.3 || goto error
 
 :: need to execute bootstrapping in a new process since it exits the current cmd process at the end of its execution...
 cmd.exe /C "bootstrap-vcpkg.bat -disableMetrics" || goto error
@@ -26,7 +30,7 @@ vcpkg install fftw3:%VCPKG_TRIPLET% || goto error
 appveyor AddMessage "Installing FFTW3 dependency done"
 
 appveyor AddMessage "Installing GDAL dependency..."
-vcpkg install gdal:%VCPKG_TRIPLET% || goto error
+vcpkg install gdal[core,mysql-libmariadb]:%VCPKG_TRIPLET% || goto error
 appveyor AddMessage "Installing GDAL dependency done"
 
 exit /b 0
