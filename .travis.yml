@@ -5,7 +5,8 @@ language: cpp
 git:
   depth: false
 
-before_install: git fetch --tags
+before_install:
+  - git fetch --tags
 
 stages:
   - test
@@ -19,6 +20,7 @@ matrix:
   include:
   # OS X
   - &osx-template
+    if: branch != coverity_scan
     stage: test
     name: "OS X - Xcode 8.3"
     os: osx
@@ -33,6 +35,7 @@ matrix:
 
   # Ubuntu trusty
   - &ubuntu-trusty-template
+    if: branch != coverity_scan
     stage: test
     name: "Ubuntu Trusty 14.04 GCC 5"
     os: linux
@@ -49,6 +52,38 @@ matrix:
           - g++-5
           - libfftw3-dev
           - libgdal-dev
+
+  - name: "Coverity Scan"
+    if: branch = coverity_scan
+    stage: test
+    os: linux
+    dist: trusty
+    env: CXX_COMPILER=/usr/bin/clang++-5.0
+    before_install:
+      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+    before_script: ":"
+    script: "cat /home/travis/build/hlysunnaram/SIRIUS/cov-int/build-log.txt"
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+          - llvm-toolchain-trusty-5.0
+          - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-5.0 main'
+            key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
+          - sourceline: 'ppa:ubuntugis/ubuntugis-unstable'
+        packages:
+          - clang-5.0
+          - libstdc++-6-dev
+          - libfftw3-dev
+          - libgdal-dev
+      coverity_scan:
+        project:
+          name: "hlysunnaram/SIRIUS"
+          description: "Sirius coverity scan"
+        notification_email: hlysunnaram@users.noreply.github.com
+        build_command_prepend: "source .travis/linux/before_build.sh; cov-configure --comptype clangcc --compiler ${CXX_COMPILER}; sh .travis/linux/coverity_pre_build.sh"
+        build_command: "make -j4"
+        branch_pattern: coverity_scan
 
   - <<: *ubuntu-trusty-template
     name: "Ubuntu Trusty 14.04 GCC 6"
@@ -223,6 +258,7 @@ matrix:
 
   # Docker
   - &centos-7-template
+    if: branch != coverity_scan
     name: "CentOS Docker"
     stage: test
     os: linux

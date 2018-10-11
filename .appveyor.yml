@@ -13,6 +13,10 @@ platform: x64
 # build Configuration, i.e. Debug, Release, etc.
 configuration: Release
 
+branches:
+  except:
+    - coverity_scan
+
 # environment variables
 environment:
   VCPKG_DIR: C:/Tools/vcpkg
